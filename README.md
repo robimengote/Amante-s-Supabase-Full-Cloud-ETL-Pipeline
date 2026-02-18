@@ -1,6 +1,12 @@
-<div align="center"># ☕ Amante's Coffee: Automated Supabase Cloud ETL Pipeline (POS > PYTHON > SUPABASE > POWER BI)</div>
+<h1 align="center">☕ Amante's Coffee: Automated Supabase Cloud ETL Pipeline</h1>
 
-<p align="center"><img src="assets/New BI SC.jpg" alt="Power BI Dashboard" width="800"></p>
+
+
+<p align="center">
+
+&nbsp; <img src="assets/New BI SC.jpg" alt="Power BI Dashboard" width="800">
+
+</p>
 
 
 
@@ -50,7 +56,7 @@ Before this pipeline, the business faced three major analytical bottlenecks:
 
 \### ✅ The Automated Solution
 
-This ETL pipeline completely removes the human element from data prep. It automatically intercepts the raw Excel file, explodes the nested text strings into granular line items, extracts complex categorical features (like sugar levels and flavors) using Regex, and totally cleands the whole dataset and loads it into a \*\*Supabase PostgreSQL database\*\*. 
+This ETL pipeline completely removes the human element from data prep. It automatically intercepts the raw Excel file, explodes the nested text strings into granular line items, extracts complex categorical features (like sugar levels and flavors) using Regex, totally cleans the dataset, and loads it into a \*\*Supabase PostgreSQL database\*\*. 
 
 
 
@@ -63,8 +69,6 @@ This ETL pipeline completely removes the human element from data prep. It automa
 
 
 \## 🏗️ Data Architecture \& Workflow
-
-
 
 
 
@@ -142,5 +146,19 @@ This pipeline requires zero manual intervention. It is deployed and orchestrated
 
 &nbsp;  ```bash
 
-&nbsp;  git clone \[https://github.com/YourUsername/Amantes-Cloud-ETL.git](https://github.com/YourUsername/Amantes-Cloud-ETL.git)
+&nbsp;  git clone https://github.com/robimengote/Amante-s-Supabase-Full-Cloud-ETL-Pipeline.git
+
+
+
+2\. Install dependencies:
+
+&nbsp;  pip install -r requirements.txt
+
+
+
+3\. Execute the pipeline:
+
+&nbsp;  python main.py
+
+&nbsp; 
 
