@@ -1,9 +1,11 @@
 name: Daily POS Automation via Supabase
 
+
+# NOTE: Scheduled runs disabled for portfolio purposes. 
+# Use 'workflow_dispatch' to trigger live demos via the GitHub UI.
 on:
-  schedule:
-    - cron: '45 17 * * *'
   workflow_dispatch:
+
 
 jobs:
   run-script:
