@@ -10,17 +10,7 @@
 
 
 
-!\[Python](https://img.shields.io/badge/Python-3.11-blue?logo=python\&logoColor=white)
-
-!\[Pandas](https://img.shields.io/badge/Pandas-Data\_Manipulation-150458?logo=pandas\&logoColor=white)
-
-!\[Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase\&logoColor=white)
-
-!\[Google API](https://img.shields.io/badge/Google\_Drive\_API-Integration-4285F4?logo=google-drive\&logoColor=white)
-
-!\[GitHub Actions](https://img.shields.io/badge/GitHub\_Actions-CI%2FCD-2088FF?logo=github-actions\&logoColor=white)
-
-!\[Power BI](https://img.shields.io/badge/Power\_BI-Analytics-F2C811?logo=powerbi\&logoColor=black)
+!\[Python](https://img.shields.io/badge/Python-3.11-blue?logo=python\&logoColor=white) !\[Pandas](https://img.shields.io/badge/Pandas-Data\_Manipulation-150458?logo=pandas\&logoColor=white) !\[Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase\&logoColor=white) !\[Google API](https://img.shields.io/badge/Google\_Drive\_API-Integration-4285F4?logo=google-drive\&logoColor=white) !\[GitHub Actions](https://img.shields.io/badge/GitHub\_Actions-CI%2FCD-2088FF?logo=github-actions\&logoColor=white) !\[Power BI](https://img.shields.io/badge/Power\_BI-Analytics-F2C811?logo=powerbi\&logoColor=black)
 
 
 
@@ -30,7 +20,7 @@ This repository contains a fully automated, cloud-native ETL (Extract, Transform
 
 
 
-The pipeline extracts raw daily Point of Sale (POS) Excel reports from Google Drive, performs complex data cleaning and dimensional modeling using Pandas, and loads the structured data into a Supabase (PostgreSQL) database. The database serves as the single source of truth for dynamic Power BI dashboards.
+The pipeline extracts raw daily Point of Sale (POS) Excel reports from Google Drive, performs complex data cleaning and dimensional modeling using Python(Pandas), and loads the structured data into a Supabase (PostgreSQL) database. The database serves as the single source of truth for dynamic Power BI dashboards.
 
 
 
@@ -146,7 +136,7 @@ This pipeline requires zero manual intervention. It is deployed and orchestrated
 
 &nbsp;  ```bash
 
-&nbsp;  git clone https://github.com/robimengote/Amante-s-Supabase-Full-Cloud-ETL-Pipeline.git
+&nbsp;  git clone \[https://github.com/robimengote/Amante-s-Supabase-Full-Cloud-ETL-Pipeline.git](https://github.com/robimengote/Amante-s-Supabase-Full-Cloud-ETL-Pipeline.git)
 
 
 
