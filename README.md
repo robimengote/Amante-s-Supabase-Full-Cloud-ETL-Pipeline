@@ -63,7 +63,7 @@ The raw POS data is highly denormalized and contains human-input errors. The Pyt
 ## ⚙️ CI/CD & Automation
 This pipeline requires zero manual intervention. It is deployed and orchestrated using **GitHub Actions**.
 
-* **Trigger:** Configured to run automatically via a CRON schedule (daily at 5:45 PM) or manually via `workflow_dispatch`. *(Note: Scheduled runs are currently disabled for this static portfolio showcase).*
+* **Trigger:** Configured to run automatically via a CRON schedule (daily at 1:30AM) or manually via `workflow_dispatch`. *(Note: Scheduled runs are currently disabled for this static portfolio showcase).*
 * **Environment:** Runs on a virtual `ubuntu-latest` runner.
 * **Security:** * API keys and Supabase credentials are obfuscated using GitHub Secrets.
   * Google Cloud credentials are securely injected at runtime by passing a Base64-encoded string into the environment and decoding it via a Python one-liner, completely avoiding raw JSON file uploads to the repository.
