@@ -69,8 +69,8 @@ graph TD
     MASTER_REPORT_FILE -->|Import Data| PBI
     
     %% Styling
-    style PY fill:#1F1F1F,stroke:#333,stroke-width:2px
-    style MASTER_REPORT_FILE fill:#1F1F1F,stroke:#333,stroke-width:2px
+    style PY fill:#E8E8FF,stroke:#333,stroke-width:2px
+    style MASTER_REPORT_FILE fill:#E8E8FF,stroke:#333,stroke-width:2px
     style SECRET fill:#fff,stroke:#f00,stroke-width:2px,stroke-dasharray: 5 5
 ```
 
