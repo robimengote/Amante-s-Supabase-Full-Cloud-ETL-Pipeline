@@ -252,6 +252,7 @@ def raw_report_transform(file_content, filename):
         "Pecan Walnut Carrot": "Moist Cakes",
         "Signature Chocolate": "Moist Cakes",
         "Banana Bread": "Pastries",
+	"Crookie": "Pastries',
         "Cookies - Biscoff": "Pastries",
         "Cookies - Chip and Chunk": "Pastries",
         "Cookies - Chip and Chunk Walnut": "Pastries",
