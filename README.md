@@ -37,6 +37,43 @@ This ETL pipeline completely removes the human element from data prep. It automa
 
 ## 🏗️ Data Architecture & Workflow
 
+```mermaid
+graph TD
+    %% Nodes
+    POS(POS System Email)
+    GAS(Google Apps Script <br/> ⏰ 1:00 AM)
+    
+    subgraph Google_Drive [Google Drive Storage]
+        RAW[📂 raw_pos_reports <br/> Staging Area]
+        ARCHIVE_POS_REPORTS[📂 archived_pos_reports <br/> Archive History]
+        MASTER_REPORT_FILE[📊 fact_sales2026<br/> Supabase Database]
+    end
+    
+    subgraph GitHub_Cloud [GitHub Actions Cloud]
+        PY(Python Automation <br/> Clean & Transform <br/> ⏰ 1:30 AM)
+        SECRET[🔒 GCP Service Key <br/> Base64 Encoded Secret]
+    end
+    
+    PBI(Power BI Dashboard <br/> 🔄 Auto-Refresh)
+    
+    %% Connections
+    POS -->|Attachment| GAS
+    GAS -->|Save File| RAW
+    
+    RAW -->|Read Data| PY
+    SECRET -.->|Authenticate| PY
+    
+    PY -->|Load Data| MASTER_REPORT_FILE
+    PY -->|Move File| ARCHIVE_POS_REPORTS
+    
+    MASTER_REPORT_FILE -->|Import Data| PBI
+    
+    %% Styling
+    style PY fill:#1F1F1F,stroke:#333,stroke-width:2px
+    style MASTER_REPORT_FILE fill:#1F1F1F,stroke:#333,stroke-width:2px
+    style SECRET fill:#fff,stroke:#f00,stroke-width:2px,stroke-dasharray: 5 5
+```
+
 1. **Extract:** A Python script authenticates with the Google Drive API using securely decoded service accounts to locate and download new daily POS reports (`.xlsx`).
 2. **Transform:** Data is passed through a robust Pandas cleaning pipeline (details below) to normalize nested data structures and enforce strict data types.
 3. **Load:** Cleaned records are converted to JSON and pushed to a Supabase PostgreSQL table (`fact_sales2026`). 
