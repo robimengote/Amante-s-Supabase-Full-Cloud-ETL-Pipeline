@@ -52,7 +52,7 @@ The raw POS data is highly denormalized and contains human-input errors. The Pyt
 * **Regex Feature Extraction:** Uses Regular Expressions (`re`) to dynamically extract attributes hidden within text strings, creating dedicated columns for:
   * `Size` (e.g., Solo, Familia)
   * `Variation` (Hot/Cold)
-  * `Flavor` (e.g., Chip and Chunk Walnut, Matcha)
+  * `Flavor` (e.g., Cheese, Sour Cream, BBQ)
   * `Sugar & Spice Levels`
 * **Data Type Enforcement & Cleansing:** * Safely strips thousand-separator commas from financial strings (e.g., `"1,192.00"`) and coerces them into operational float types.
   * Handles `NaN` and `Infinity` float anomalies before database ingestion to prevent SQL mapping errors.
