@@ -1,7 +1,7 @@
 <h1 align="center">☕ Amante's Coffee: Automated Supabase Cloud ETL Pipeline</h1>
 
 <p align="center">
-  <img src="assets/New BI SC.jpg" alt="Power BI Dashboard" width="800">
+  <img src="assets/ETL Project Flowchart.png" alt="ETL Flowchart" width="800">
 </p>
 
 <p align="center">
