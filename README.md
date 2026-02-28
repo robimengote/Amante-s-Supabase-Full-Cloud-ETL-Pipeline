@@ -76,11 +76,11 @@ graph TD
     FINAL_FACT -->|Import Data| PBI
     
     %% Styling
-    style PY fill:#E8E8FF,stroke:#333,stroke-width:2px
-    style STAGING_TABLE fill:#E8E8FF,stroke:#333,stroke-width:2px
-    style QUARANTINE_TABLE fill:#FFCCCC,stroke:#FF0000,stroke-width:2px
-    style FINAL_FACT fill:#D4EDDA,stroke:#28A745,stroke-width:2px
-    style SECRET fill:#fff,stroke:#f00,stroke-width:2px,stroke-dasharray: 5 5
+    style PY fill:#E8E8FF,stroke:#000000,stroke-width:2px
+    style STAGING_TABLE fill:#E8E8FF,stroke:#000000,stroke-width:2px
+    style QUARANTINE_TABLE fill:#FFCCCC,stroke:#000000,stroke-width:2px
+    style FINAL_FACT fill:#D4EDDA,stroke:#000000,stroke-width:2px
+    style SECRET fill:#fff,stroke:#000000,stroke-width:2px,stroke-dasharray: 5 5
 ```
 
 1. **Extract:** A Python script authenticates with the Google Drive API using securely decoded service accounts to locate and download new daily POS reports (`.xlsx`).
@@ -115,7 +115,7 @@ To ensure that dashboard reporting is never compromised by POS glitches or unrec
 1. **Boolean Mask Validation:** During the Python transformation phase, incoming data is evaluated against strict logic (e.g., filtering rows with negative mathematical/financial figures).
 2. **The `staging_quarantine` Table:** Any row that fails validation is stripped of strict database constraints (Schema-on-Read) and diverted to a dedicated quarantine table. This prevents the pipeline from crashing while preserving the raw text of the broken row for debugging.
 3. **Reprocessing Automation:** Once missing dimension data (like a newly launched menu item) is added to the database, a custom SQL RPC (`reprocess_quarantine`) can be triggered to automatically re-evaluate the quarantined rows, move them to the final fact table, and delete them from the error log.
-
+	
 
 ## ⚙️ CI/CD & Automation
 This pipeline requires zero manual intervention. It is deployed and orchestrated using **GitHub Actions**.
