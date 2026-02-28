@@ -102,7 +102,7 @@ The raw POS data is highly denormalized and contains human-input errors. The Pyt
   * `Flavor` (e.g., Cheese, Sour Cream, BBQ)
   * `Sugar & Spice Levels`
 * **Data Type Enforcement & Cleansing:** Safely strips thousand-separator commas from financial strings (e.g., `"1,192.00"`) and handles NaN values using SQL COALESCE logic before `final_fact_sales` ingestion.
-* **Handles `NaN` and `Infinity` float anomalies before database ingestion to prevent SQL mapping errors.
+* **NaN & Infinity:** Handles `NaN` and `Infinity` float anomalies before database ingestion to prevent SQL mapping errors.
 * **Categorical Mapping:** Maps over 100 distinct raw items into standardized `Sub-Category` and `Category` hierarchies using predefined dictionary logic.
 * **Pre-Upload Deduplication:** Enforces idempotency by dropping payload duplicates inside the dataframe, preventing transaction block errors during the database upsert phase.
 
