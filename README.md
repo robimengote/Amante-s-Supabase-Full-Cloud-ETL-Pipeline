@@ -32,7 +32,9 @@ Before this pipeline, the business faced three major analytical bottlenecks:
 ### ✅ The Automated Solution
 This ETL pipeline completely removes the human element from data prep. It automatically intercepts the raw Excel file, explodes the nested text strings into granular line items, extracts complex categorical features (like sugar levels and flavors) using Regex, completely cleans the dataset, and manages a fully normalized **Star Schema** within a **Supabase PostgreSQL database**.
 
-**The result:** The business owners now have a zero-maintenance, highly relational database that feeds real-time Power BI dashboards, allowing them to instantly see which specific menu items drive the most revenue while ensuring 100% data integrity.
+### 📈 The Result:
+The business owners now have a zero-maintenance, highly relational database that feeds real-time Power BI dashboards, allowing them to instantly see which specific menu items drive the most revenue while ensuring 100% data integrity.
+
 ---
 
 ## 🏗️ Data Architecture & Workflow
