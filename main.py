@@ -25,17 +25,16 @@ supabase: Client = create_client(url, key)
 # --- FUNCTIONS ---
 
 def load_to_supabase(df, table_name):
-
     try:
         # 1. Sanitize Column Names
         df.columns = df.columns.str.lower().str.replace(' ', '_').str.replace('/', '_').str.replace('-', '_')
-        
+
         # 2. Convert to List of Dictionaries (Raw Data)
         raw_records = df.to_dict(orient='records')
-        
+
         # 3. Manually clean every value
         clean_records = []
-        
+
         for record in raw_records:
             new_record = {}
             for key, value in record.items():
@@ -48,16 +47,50 @@ def load_to_supabase(df, table_name):
 
         # 4. Insert into Supabase
         print(f"Uploading {len(clean_records)} rows to Supabase...")
-        response = supabase.table(table_name).insert(clean_records).execute()
-        
+        response = supabase.table(table_name).upsert(clean_records).execute()
+
         print(f"✅ Success! Inserted {len(clean_records)} rows into {table_name}.")
         return response
 
     except Exception as e:
         print(f"❌ Error uploading to Supabase: {e}")
         # This will print the exact record causing the issues with infinite/NaN values
-        # print("First record:", clean_records[0]) 
+        # print("First record:", clean_records[0])
         raise e
+
+
+def load_to_supabase_quarantine(df, table_name):
+    try:
+        # 1. Sanitize Column Names
+        df.columns = df.columns.str.lower().str.replace(' ', '_').str.replace('/', '_').str.replace('-', '_')
+
+        # 2. Convert to List of Dictionaries (Raw Data)
+        raw_records = df.to_dict(orient='records')
+
+        # 3. Manually clean every value
+        quarantine_records = []
+
+        for record in raw_records:
+            new_record = {}
+            for key, value in record.items():
+                # Check if it is a float AND if it is infinite or NaN
+                if isinstance(value, float) and (math.isinf(value) or math.isnan(value)):
+                    new_record[key] = None
+                else:
+                    new_record[key] = value
+            quarantine_records.append(new_record)
+
+        # 4. Insert into Supabase
+        print(f"Uploading {len(quarantine_records)} rows to Supabase...")
+        response = supabase.table(table_name).upsert(quarantine_records).execute()
+
+        print(f"✅ Success! Inserted {len(quarantine_records)} rows into {table_name}. Please fix before loading to final_fact_sales table")
+        return response
+        
+    except Exception as e:
+        print(f"❌ Error uploading to Supabase Staging Quarantine: {e}")
+        raise e
+
 
 def raw_report_transform(file_content, filename):
     # 1. Load Data
@@ -81,21 +114,25 @@ def raw_report_transform(file_content, filename):
 
     # 5. Extract Variation (Hot/Cold)
     hot_cold_pattern = r'(Hot|Cold)'
-    df_exploded['Variation'] = df_exploded['product_list'].str.extract(hot_cold_pattern, flags=re.I, expand=False).str.title()
+    df_exploded['Variation'] = df_exploded['product_list'].str.extract(hot_cold_pattern, flags=re.I,
+                                                                       expand=False).str.title()
 
     # 6. Extract Flavor (Fries/Lemonade)
     target_ff_p = r'(Fries|Lemonade)'
     is_target1 = df_exploded['product_list'].str.contains(target_ff_p, case=False, na=False)
     fries_flavor_pattern = r'(Cheese|BBQ|Sour Cream|Plain|Mango)'
-    df_exploded.loc[is_target1, 'Flavor'] = df_exploded.loc[is_target1, 'product_list'].str.extract(fries_flavor_pattern, flags=re.I, expand=False).str.title()
+    df_exploded.loc[is_target1, 'Flavor'] = df_exploded.loc[is_target1, 'product_list'].str.extract(
+        fries_flavor_pattern, flags=re.I, expand=False).str.title()
 
     # 7. Extract Sugar Level
     sugar_pattern = r'(Sugar 20%|Sugar 50%|Sugar 75%|Sugar 100%)'
-    df_exploded['Sugar Level'] = df_exploded['product_list'].str.extract(sugar_pattern, flags=re.I, expand=False).str.title()
+    df_exploded['Sugar Level'] = df_exploded['product_list'].str.extract(sugar_pattern, flags=re.I,
+                                                                         expand=False).str.title()
 
     # 8. Extract Spice Level
     spicy_pattern = r'(Mild \(1/4\)|Regular \(2/4\)|Spicy \(3/4\))'
-    df_exploded['Spice Level'] = df_exploded['product_list'].str.extract(spicy_pattern, flags=re.I, expand=False).str.title()
+    df_exploded['Spice Level'] = df_exploded['product_list'].str.extract(spicy_pattern, flags=re.I,
+                                                                         expand=False).str.title()
 
     # 9. Extract Quantity
     df_exploded['Quantity'] = df_exploded['product_list'].str.extract(r'x\s*(\d+)').astype(float).fillna(1)
@@ -103,33 +140,39 @@ def raw_report_transform(file_content, filename):
     # 10. Complex Extraction - this code block will edit the names for the target items (Croissant, Croffle, Cookies, Cookie)
     # The code will extract the item name and the flavor, put it in two different columns, then concatenate in Clean_Item, and drop the temporary columns
 
-
     target_categories = ['Croissant', 'Croffle', 'Cookies', 'Cookie']
     target_mask_pattern = r'(' + '|'.join(target_categories) + r')'
 
     flavors_list = [
-        'Chip and Chunk Walnut', 'Nutella Pecan Cookie', 'Red Velvet Cookie', 
-        'Smores Cookie', 'Almond Nutella', 'Biscoff Cookie', 'Strawberry Cream', 
-        'Spam and Egg', 'Chip and Chunk', 'Biscoff', 'Caramel', 'Chocolate', 
+        'Chip and Chunk Walnut', 'Nutella Pecan Cookie', 'Red Velvet Cookie',
+        'Smores Cookie', 'Almond Nutella', 'Biscoff Cookie', 'Strawberry Cream',
+        'Spam and Egg', 'Chip and Chunk', 'Biscoff', 'Caramel', 'Chocolate',
         'Matcha', 'Oreo', 'Plain', 'Smores', 'Red Velvet', 'Dubai'
     ]
 
     flavor_pattern = r'(' + '|'.join(map(re.escape, flavors_list)) + r')'
     is_target = df_exploded['product_list'].str.contains(target_mask_pattern, case=False, na=False)
 
-    df_exploded.loc[is_target, 'Temp_Flavor'] = df_exploded.loc[is_target, 'product_list'].str.extract(flavor_pattern, flags=re.I, expand=False)
-    df_exploded.loc[is_target, 'Temp_Flavor'] = df_exploded.loc[is_target, 'Temp_Flavor'].str.replace(r'\s*Cookie', '', regex=True, flags=re.I).str.strip()
+    df_exploded.loc[is_target, 'Temp_Flavor'] = df_exploded.loc[is_target, 'product_list'].str.extract(flavor_pattern,
+                                                                                                       flags=re.I,
+                                                                                                       expand=False)
+    df_exploded.loc[is_target, 'Temp_Flavor'] = df_exploded.loc[is_target, 'Temp_Flavor'].str.replace(r'\s*Cookie', '',
+                                                                                                      regex=True,
+                                                                                                      flags=re.I).str.strip()
 
-    df_exploded.loc[is_target, 'Category_Name'] = df_exploded.loc[is_target, 'product_list'].str.extract(target_mask_pattern, flags=re.I, expand=False).str.title()
+    df_exploded.loc[is_target, 'Category_Name'] = df_exploded.loc[is_target, 'product_list'].str.extract(
+        target_mask_pattern, flags=re.I, expand=False).str.title()
     df_exploded.loc[is_target & (df_exploded['Category_Name'] == 'Cookie'), 'Category_Name'] = 'Cookies'
 
     df_exploded.loc[is_target, 'Clean_Item'] = (
-        df_exploded.loc[is_target, 'Category_Name'] + " - " + df_exploded.loc[is_target, 'Temp_Flavor']
+            df_exploded.loc[is_target, 'Category_Name'] + " - " + df_exploded.loc[is_target, 'Temp_Flavor']
     )
 
     # 11. Handle Non-Targets
-    df_exploded.loc[~is_target, 'Clean_Item'] = df_exploded.loc[~is_target, 'product_list'].str.replace(r'x\s*\d+', '', regex=True)
-    df_exploded.loc[~is_target, 'Clean_Item'] = df_exploded.loc[~is_target, 'Clean_Item'].str.replace(r'\s*\(.*\)', '', regex=True).str.strip()
+    df_exploded.loc[~is_target, 'Clean_Item'] = df_exploded.loc[~is_target, 'product_list'].str.replace(r'x\s*\d+', '',
+                                                                                                        regex=True)
+    df_exploded.loc[~is_target, 'Clean_Item'] = df_exploded.loc[~is_target, 'Clean_Item'].str.replace(r'\s*\(.*\)', '',
+                                                                                                      regex=True).str.strip()
 
     # 12. Manual Corrections - (Made a dictionary for future corrections)
     product_corrections = {
@@ -138,7 +181,7 @@ def raw_report_transform(file_content, filename):
 
     df_exploded['Clean_Item'] = df_exploded['Clean_Item'].replace(product_corrections)
 
-    # 13. Map all the products to their respective sub-categories 
+    # 13. Map all the products to their respective sub-categories
 
     product_to_sub_category = {
         # Add-Ons
@@ -234,7 +277,7 @@ def raw_report_transform(file_content, filename):
         "Strawberry Matcha": "Milk Based",
         "Strawberry Milk": "Milk Based",
         "White Chocolate": "Milk Based",
-        "White Chocolate Chip": "Pastries", 
+        "White Chocolate Chip": "Pastries",
 
         # Desserts
         "Biscoff Cheesecake": "Cheesecakes",
@@ -252,7 +295,7 @@ def raw_report_transform(file_content, filename):
         "Pecan Walnut Carrot": "Moist Cakes",
         "Signature Chocolate": "Moist Cakes",
         "Banana Bread": "Pastries",
-	"Crookie": "Pastries',
+        "Crookie": "Pastries",
         "Cookies - Biscoff": "Pastries",
         "Cookies - Chip and Chunk": "Pastries",
         "Cookies - Chip and Chunk Walnut": "Pastries",
@@ -278,14 +321,15 @@ def raw_report_transform(file_content, filename):
         "Croissant - Plain": "Pastries",
         "Croissant - Spam and Egg": "Pastries",
 
-        # Others
+    # Others
         "Bottled Water": "Others",
         "Coke in Can": "Others"
+
     }
 
 
     # Map all the sub-categories to their respective categories
-    
+
     sub_category_to_category = {
         "Add-Ons (Cake)": "Add-Ons",
         "Food Add-Ons": "Add-Ons",
@@ -308,12 +352,13 @@ def raw_report_transform(file_content, filename):
 
     df_exploded['Sub-Category'] = df_exploded['Clean_Item'].map(product_to_sub_category)
     df_exploded['Category'] = df_exploded['Sub-Category'].map(sub_category_to_category)
-    
+
     # 15. Payment Type Function
 
     def get_payment_type(row):
-        val_cash = str(row.get('Cash', 0)) # Safer .get
-        
+
+        val_cash = str(row.get('Cash', 0))  # Safer .get
+
         if val_cash == '0.00' or val_cash == '0':
             return 'Free/Voucher/Discounted'
         elif val_cash != '-':
@@ -327,18 +372,17 @@ def raw_report_transform(file_content, filename):
 
     # 16. Final Cleanup
     cols_to_use = [
-        'Order ID', 'Clean_Item', 'Sub-Category', 'Category', 'Flavor', 
-        'Variation', 'Size', 'Quantity', 'Spice Level', 'Sugar Level', 
+        'Order ID', 'Clean_Item', 'Sub-Category', 'Category', 'Flavor',
+        'Variation', 'Size', 'Quantity', 'Spice Level', 'Sugar Level',
         'Product amount', 'Received amount', 'Payment time', 'Payment Type', 'Type/Channel'
     ]
-    
+
     # Ensure columns exist before selecting
     existing_cols = [c for c in cols_to_use if c in df_exploded.columns]
     df_exploded = df_exploded[existing_cols]
-    
+
     df_exploded = df_exploded[df_exploded['Clean_Item'].astype(str) != 'nan']
     df_exploded['Clean_Item'] = df_exploded['Clean_Item'].str.title()
-
 
     # Make sure all numeric columns are fit to JSON
 
@@ -348,21 +392,24 @@ def raw_report_transform(file_content, filename):
         df_exploded[col] = df_exploded[col].astype(str).str.replace(',', '')
         df_exploded[col] = pd.to_numeric(df_exploded[col], errors='coerce')
 
-    
     df_exploded.rename(columns={
-        'Clean_Item': 'Items', 
-        'Type/Channel': 'Order Type', 
+        'Clean_Item': 'Items',
+        'Type/Channel': 'Order Type',
         'Product amount': 'Total Order Amount'
     }, inplace=True)
 
-    df_exploded = df_exploded.iloc[:-1] # Remove footer row
+
+    df_exploded['Category'] = df_exploded['Category'].fillna('Uncategorized')
+    df_exploded['Sub-Category'] = df_exploded['Sub-Category'].fillna('Uncategorized')
+
+    df_exploded = df_exploded.iloc[:-1]  # Remove footer row
 
     return df_exploded
 
 
 def main():
+   
     print("--- STARTING AUTOMATION ---")
-    
     # 1. Connect to Drive
     SCOPES = ['https://www.googleapis.com/auth/drive']
     creds = service_account.Credentials.from_service_account_file('service_account.json', scopes=SCOPES)
@@ -377,37 +424,77 @@ def main():
         print("No new reports found. Exiting.")
         return
 
+    else:
+        print("File found. Processing the file")
+
     # 3. Process Each New File
     processed_dfs = []
-    
+    quarantine_dfs = []
+
     for file in files:
         print(f"Processing: {file['name']}")
-        
+
+
         request = drive_service.files().get_media(fileId=file['id'])
         file_content = io.BytesIO(request.execute())
-        
-        clean_df = raw_report_transform(file_content, file['name'])
-        
+
+        transformed_df = raw_report_transform(file_content, file['name'])
+
+        conditions = [
+            (transformed_df['Clean_Item'].isna()) |
+            (transformed_df['Sub_Category'].isna()) |
+            (transformed_df['Category'].isna()) |
+            (transformed_df['Quantity'] < 0) |
+            (transformed_df['Product amount'] < 0) |
+            (transformed_df['Received amount'] < 0)
+
+        ]
+
+        clean_df = transformed_df[~conditions]
+        quarantine_df = transformed_df[conditions]
+
         if clean_df is not None and not clean_df.empty:
             processed_dfs.append(clean_df)
-            
+            print("Succesfully appended clean dataframe to processed_dfs list")
+
+        if quarantine_df is not None and not quarantine_df.empty:
+            quarantine_dfs.append(quarantine_df)
+            print("Rows up for quarantine found. Appending to quarantine_dfs list")
+
             # Archive file
             drive_service.files().update(
                 fileId=file['id'],
                 addParents=ARCHIVE_FOLDER_ID,
                 removeParents=RAW_FOLDER_ID
             ).execute()
-            print(f"   -> Archived {file['name']}")
+            print(f"Archived {file['name']}")
 
     # 4. Upload to Supabase (The Fix)
     if processed_dfs:
-        print("Concatenating all files...")
+        print("Concatenating clean files...")
         master_df = pd.concat(processed_dfs, ignore_index=True)
-        
+
         # Call the function (now defined correctly outside main)
         load_to_supabase(master_df, "fact_sales2026")
+        supabase.rpc('update_final_fact_sales').execute()
+        print("Pipeline Complete! 🚀")
+
     else:
-        print("No valid data processed.")
+        print("Nothing to process.")
+
+    if quarantine_dfs:
+        print("Concatenating quarantine files...")
+        quarantine_master = pd.concat(quarantine_dfs, ignore_index=True)
+
+        load_to_supabase_quarantine(quarantine_master, "staging_quarantine")
+
+    else:
+        print("Nothing to process")
+
 
 if __name__ == "__main__":
     main()
+
+
+
+
