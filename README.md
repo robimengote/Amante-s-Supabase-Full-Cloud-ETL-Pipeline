@@ -76,11 +76,11 @@ graph TD
     FINAL_FACT -->|Import Data| PBI
     
     %% Styling
-    style PY fill:#E8E8FF,stroke:#000000,stroke-width:2px
-    style STAGING_TABLE fill:#E8E8FF,stroke:#000000,stroke-width:2px
-    style QUARANTINE_TABLE fill:#FFCCCC,stroke:#000000,stroke-width:2px
-    style FINAL_FACT fill:#D4EDDA,stroke:#000000,stroke-width:2px
-    style SECRET fill:#fff,stroke:#000000,stroke-width:2px,stroke-dasharray: 5 5
+    style PY fill:#E8E8FF,stroke:#000000,stroke-width:2px,color:#000000
+    style STAGING_TABLE fill:#E8E8FF,stroke:#000000,stroke-width:2px,color:#000000
+    style QUARANTINE_TABLE fill:#FFCCCC,stroke:#000000,stroke-width:2px,color:#000000
+    style FINAL_FACT fill:#D4EDDA,stroke:#000000,stroke-width:2px,color:#000000
+    style SECRET fill:#fff,stroke:#000000,stroke-width:2px,color:#000000,stroke-dasharray: 5 5
 ```
 
 1. **Extract:** A Python script authenticates with the Google Drive API using securely decoded service accounts to locate and download new daily POS reports (`.xlsx`).
